@@ -1,4 +1,3 @@
-//using PremierLeagueTests.Pages;
 using PremierLeagueTests.TestUtils;
 using Xunit;
 

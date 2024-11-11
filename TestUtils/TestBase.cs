@@ -1,7 +1,7 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Xunit;
-using SeleniumExtras.WaitHelpers;  
+
 
 namespace PremierLeagueTests.TestUtils
 {
@@ -20,5 +20,8 @@ namespace PremierLeagueTests.TestUtils
             Driver.Quit();
         }
     
+    
+    }
+    }
 
 
