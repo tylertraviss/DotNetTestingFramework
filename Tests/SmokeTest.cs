@@ -1,3 +1,4 @@
+using OpenQA.Selenium;
 using PremierLeagueTests.TestUtils;
 using Xunit;
 
@@ -10,7 +11,9 @@ namespace PremierLeagueTests.Tests
         {
             Assert.Contains("Premier League", Driver.Title);
 
-            // Test Change
+            string discipline_xpath = "//a[normalize-space()='Discipline']";
+            ClickElement(By.XPath(discipline_xpath));
+
         }
     }
 }
