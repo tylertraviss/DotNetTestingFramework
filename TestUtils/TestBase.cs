@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -15,18 +16,20 @@ namespace PremierLeagueTests.TestUtils
 
         static TestBase()
         {
-
+            // Ensure Logs directory exists
             if (!Directory.Exists("Logs"))
             {
                 Directory.CreateDirectory("Logs");
             }
 
+            // Configure Serilog
             Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .WriteTo.Console()
-            .WriteTo.File("Logs/test_log.txt", rollingInterval: RollingInterval.Day)
-            .CreateLogger();
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/test_log.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
 
+            // Create a logger factory that uses Serilog
             var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddSerilog();
@@ -78,11 +81,40 @@ namespace PremierLeagueTests.TestUtils
             return wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(locator));
         }
 
+        /// <summary>
+        /// Checks if an element exists on the page.
+        /// </summary>
+        /// <param name="locator">The locator to find the element.</param>
+        /// <param name="timeoutInSeconds">Maximum time to wait for the element.</param>
+        /// <returns>True if the element exists, otherwise false.</returns>
+        protected bool ElementExists(By locator, int timeoutInSeconds = 5)
+        {
+            _logger.LogInformation($"Checking existence of element: {locator}");
+            try
+            {
+                var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(timeoutInSeconds));
+                wait.Until(driver => driver.FindElements(locator).Count > 0);
+                _logger.LogInformation($"Element exists: {locator}");
+                return true;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                _logger.LogWarning($"Element does not exist: {locator}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while checking element existence: {locator}. Exception: {ex.Message}");
+                return false;
+            }
+        }
+
         public void Dispose()
         {
             _logger.LogInformation("Quitting WebDriver.");
             Driver.Quit();
             _logger.LogInformation("WebDriver closed successfully.");
+            Log.CloseAndFlush(); // Ensure all logs are flushed
         }
     }
 }
