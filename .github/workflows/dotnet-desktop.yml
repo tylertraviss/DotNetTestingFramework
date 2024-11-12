@@ -14,10 +14,17 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
+      - name: List directory contents
+        run: |
+          echo "Current Directory:"
+          pwd
+          echo "Contents of the base directory:"
+          ls -R
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.0.x' # Adjust to the required .NET version
+          dotnet-version: '8.0.403'  # Specified version
 
       - name: Restore dependencies
         run: dotnet restore DotNetTestingFramework/MyProject.sln
