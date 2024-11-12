@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using Serilog;
 using Xunit;
 
 namespace PremierLeagueTests.TestUtils
@@ -14,12 +15,21 @@ namespace PremierLeagueTests.TestUtils
 
         static TestBase()
         {
-            // Configure the logger
-            using var loggerFactory = LoggerFactory.Create(builder =>
+
+            if (!Directory.Exists("Logs"))
             {
-                builder
-                    .AddConsole() // Log to console
-                    .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information); // Specify namespace explicitly
+                Directory.CreateDirectory("Logs");
+            }
+
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/test_log.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddSerilog();
             });
 
             _logger = loggerFactory.CreateLogger<TestBase>();
@@ -30,7 +40,7 @@ namespace PremierLeagueTests.TestUtils
             _logger.LogInformation("Initializing WebDriver.");
             this.Driver = new ChromeDriver();
             this.Driver.Navigate().GoToUrl("https://www.espn.com/soccer/stats/_/league/eng.1");
-            _logger.LogInformation("Navigated to Premier League ESPN Page.");
+            _logger.LogInformation("Navigated to Premier League homepage.");
         }
 
         // Helper function for clicking an element
